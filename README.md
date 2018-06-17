@@ -2,7 +2,7 @@
 
 Promisified [dbus-native](https://github.com/sidorares/dbus-native)
 
-```
+```javascript
 const dbus = require('promisified-dbus-native');
 
 dbus.systemBus()
