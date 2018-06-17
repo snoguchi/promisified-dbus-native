@@ -43,6 +43,7 @@ function promisifyObject(obj) {
 const createClient = dbus.createClient;
 dbus.createClient = function() {
   const bus = createClient.apply(dbus, arguments);
+
   const getService = bus.getService;
   bus.getService = function(name) {
     const service = getService.call(bus, name);
@@ -59,6 +60,29 @@ dbus.createClient = function() {
     }
     return service;
   }
+
+  const getObject = bus.getObject;
+  bus.getObject = function(path, name, callback) {
+    if (typeof callback !== 'undefined') {
+      return getObject.apply(bus, arguments);
+    } else {
+      return bus.getService(path).getObject(name);
+    }
+  }
+
+  const getInterface = bus.getInterface;
+  bus.getInterface = function(path, objname, name, callback) {
+    if (typeof callback !== 'undefined') {
+      return getInterface.apply(bus, arguments);
+    } else {
+      return new Promise((resolve, reject) => {
+        bus.getService(path).getObject(objname)
+          .then(obj => resolve(obj.as(name)))
+          .catch(reject);
+      });
+    }
+  }
+
   return bus;
 }
 
